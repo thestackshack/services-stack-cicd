@@ -195,6 +195,7 @@ Resources:
                   {
                     "Environment": "${Environment}",
                     "VPCStack" : "${VPCStack}",
-                    "ECSStack" : "${ECSStack}"
+                    "ECSStack" : "${ECSStack}",
+                    "GitHubToken" : "${GitHubToken}"
                   }
               RunOrder: 1
