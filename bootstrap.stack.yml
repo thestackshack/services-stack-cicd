@@ -311,7 +311,7 @@ Resources:
                 Version: 1
                 Provider: CloudFormation
               Configuration:
-                TemplatePath: "GitSource::stacks/service1.bootstrap.stack.yml"
+                TemplatePath: "GitSource::stacks/service1.stack.yml"
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_NAMED_IAM
                 RoleArn: !GetAtt CloudFormationRole.Arn
