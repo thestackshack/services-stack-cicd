@@ -1,0 +1,32 @@
+version: 0.1
+stack:
+  name: "${env.StackName}" # Note: Update this with your stack name
+  template:
+    file: vpc.stack.yml
+    bucket: services-cicd # Note: Update this with your bucket name. # Note: Update this with your bucket name.  Stacks are uploaded here prior to deployment.'
+
+#
+# Reference parent stacks fo included shared information like stack name.
+#
+#  parents:
+#    vpc: '../vpc'
+
+#
+# Define stack input parameters.
+#
+  parameters:
+    AvailabilityZones: 'us-east-1a, us-east-1b'
+    KeyPairName: 'bluefineng'
+    NumberOfAZs: '2'
+
+#
+# Define stack capabilities required.
+#
+#  capabilities:
+#    - 'CAPABILITY_IAM'
+
+#
+# Define global tags.
+#
+#  tags:
+#    app: 'cim-stack'

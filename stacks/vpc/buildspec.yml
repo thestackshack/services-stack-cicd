@@ -1,0 +1,14 @@
+version: 0.2
+
+# aws/codebuild/nodejs:6.3.1
+phases:
+  install:
+    commands:
+  pre_build:
+    commands:
+      - echo Installing CIM
+      - cd ./stacks/vpc && npm install cim -g
+  build:
+    commands:
+      - echo Updating Stack
+      - cim stack-up

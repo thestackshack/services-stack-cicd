@@ -63,12 +63,12 @@ Resources:
               - cloudformation:*
             Effect: Allow
             Resource:
-              - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/video-*
+              - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/*
           - Action:
               - codepipeline:*
             Effect: Allow
             Resource:
-              - !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:video-*
+              - !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:*
           - Action:
               - codebuild:StartBuild
               - codebuild:BatchGetBuilds
@@ -119,12 +119,108 @@ Resources:
               - '*'
 
   #
+  # IAM role needed by our CodeBuild
+  #
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+  CodeBuildPolicy:
+    Type: AWS::IAM::Policy
+    Description: Policy for the codebuild execution
+    DependsOn: CodeBuildRole
+    Properties:
+      PolicyName:
+        Fn::Join:
+          - ''
+          - - Ref: AWS::StackName
+            - '-codebuild-policy'
+      Roles:
+        - !Ref CodeBuildRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - '*'
+            Resource:
+              - '*'
+
+  #
+  # Code Build project.
+  # This Creates/Updates the VPC CloudFormation stack.
+  # This is required over the normal CloudFormation CodePipeline step due to the large size of the VPC template. > 51200 bytes
+  #
+  VPCCodeBuildProd:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/nodejs:6.3.1
+        Type: LINUX_CONTAINER
+        EnvironmentVariables:
+          - Name: StackName
+            Value:
+              Fn::Join:
+                - ''
+                - - Ref: AWS::StackName
+                  - '-vpc-prod'
+      Name:
+        Fn::Join:
+          - ''
+          - - Ref: AWS::StackName
+            - '-code-build-prod'
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: stacks/vpc/buildspec.yml
+      TimeoutInMinutes: 5 # must be between 5 minutes and 8 hours
+  VPCCodeBuildSandbox:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/nodejs:6.3.1
+        Type: LINUX_CONTAINER
+        EnvironmentVariables:
+          - Name: StackName
+            Value:
+              Fn::Join:
+                - ''
+                - - Ref: AWS::StackName
+                  - '-vpc-sandbox'
+      Name:
+        Fn::Join:
+          - ''
+          - - Ref: AWS::StackName
+            - '-code-build-sandbox'
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: stacks/vpc/buildspec.yml
+      TimeoutInMinutes: 5 # must be between 5 minutes and 8 hours
+
+  #
   # Pipelines that create/update the cloudformation stacks within the project
   # Prod environment.
   #
   PipelineProd:
     Description: The pipeline that will generate other stacks
     Type: AWS::CodePipeline::Pipeline
+    DependsOn:
+      - VPCCodeBuildProd
     Properties:
       RestartExecutionOnUpdate: True
       RoleArn: !GetAtt CodePipelineRole.Arn
@@ -141,7 +237,7 @@ Resources:
                 Version: 1
                 Provider: GitHub
               OutputArtifacts:
-                - Name: GroupSource
+                - Name: GitSource
               Configuration:
                 Owner: !Ref GitHubOwner
                 Branch: 'master'
@@ -151,35 +247,23 @@ Resources:
         - Name: VPC
           Actions:
             - Name: VPC
-              InputArtifacts:
-                - Name: GroupSource
-              OutputArtifacts:
-                - Name: VPCOutput
               ActionTypeId:
-                Category: Deploy
+                Category: Build
                 Owner: AWS
+                Provider: CodeBuild
                 Version: 1
-                Provider: CloudFormation
               Configuration:
-                TemplatePath: !Sub "GroupSource::stacks/vpc.stack.json"
-                ActionMode: CREATE_UPDATE
-                Capabilities: CAPABILITY_NAMED_IAM
-                RoleArn: !GetAtt CloudFormationRole.Arn
-                StackName:
-                  Fn::Join:
-                    - ''
-                    - - Ref: AWS::StackName
-                      - '-vpc-prod'
-                ParameterOverrides: !Sub |
-                  {
-                      "Environment": "prod"
-                  }
+                ProjectName: !Ref VPCCodeBuildProd
+              InputArtifacts:
+                - Name: GitSource
+              OutputArtifacts:
+                - Name: VPCSource
               RunOrder: 1
         - Name: ECS
           Actions:
             - Name: ECS
               InputArtifacts:
-                - Name: GroupSource
+                - Name: GitSource
                 - Name: VPCSource
               OutputArtifacts:
                 - Name: ECSOutput
@@ -189,7 +273,7 @@ Resources:
                 Version: 1
                 Provider: CloudFormation
               Configuration:
-                TemplatePath: !Sub "GroupSource::stacks/ecs.stack.yml"
+                TemplatePath: "GitSource::stacks/ecs.stack.yml"
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_NAMED_IAM
                 RoleArn: !GetAtt CloudFormationRole.Arn
@@ -198,15 +282,11 @@ Resources:
                     - ''
                     - - Ref: AWS::StackName
                       - '-ecs-prod'
-                ParameterOverrides: !Sub
-                  - |
-                    {
-                      "Environment": "prod"
-                      "VPCStack" : "${VPCStack}"
-                    }
-                  - {
-                      VPCStack: { "Join" : ["", [{"Ref": "AWS::StackName"}, "-vpc-prod"]]}
-                    }
+                ParameterOverrides: !Sub |
+                  {
+                    "Environment": "prod"
+                    "VPCStack" : "${AWS::StackName}-vpc-prod"
+                  }
               RunOrder: 1
 
   #
@@ -216,6 +296,8 @@ Resources:
   PipelineSandbox:
     Description: The pipeline that will generate other stacks
     Type: AWS::CodePipeline::Pipeline
+    DependsOn:
+      - VPCCodeBuildSandbox
     Properties:
       RestartExecutionOnUpdate: True
       RoleArn: !GetAtt CodePipelineRole.Arn
@@ -232,7 +314,7 @@ Resources:
                 Version: 1
                 Provider: GitHub
               OutputArtifacts:
-                - Name: GroupSource
+                - Name: GitSource
               Configuration:
                 Owner: !Ref GitHubOwner
                 Branch: 'master'
@@ -242,35 +324,23 @@ Resources:
         - Name: VPC
           Actions:
             - Name: VPC
-              InputArtifacts:
-                - Name: GroupSource
-              OutputArtifacts:
-                - Name: VPCOutput
               ActionTypeId:
-                Category: Deploy
+                Category: Build
                 Owner: AWS
+                Provider: CodeBuild
                 Version: 1
-                Provider: CloudFormation
               Configuration:
-                TemplatePath: !Sub "GroupSource::stacks/vpc.stack.json"
-                ActionMode: CREATE_UPDATE
-                Capabilities: CAPABILITY_NAMED_IAM
-                RoleArn: !GetAtt CloudFormationRole.Arn
-                StackName:
-                  Fn::Join:
-                    - ''
-                    - - Ref: AWS::StackName
-                      - '-vpc-sandbox'
-                ParameterOverrides: !Sub |
-                  {
-                      "Environment": "sandbox"
-                  }
+                ProjectName: !Ref VPCCodeBuildSandbox
+              InputArtifacts:
+                - Name: GitSource
+              OutputArtifacts:
+                - Name: VPCSource
               RunOrder: 1
         - Name: ECS
           Actions:
             - Name: ECS
               InputArtifacts:
-                - Name: GroupSource
+                - Name: GitSource
                 - Name: VPCSource
               OutputArtifacts:
                 - Name: ECSOutput
@@ -280,7 +350,7 @@ Resources:
                 Version: 1
                 Provider: CloudFormation
               Configuration:
-                TemplatePath: !Sub "GroupSource::stacks/ecs.stack.yml"
+                TemplatePath: "GitSource::stacks/ecs.stack.yml"
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_NAMED_IAM
                 RoleArn: !GetAtt CloudFormationRole.Arn
@@ -289,13 +359,9 @@ Resources:
                     - ''
                     - - Ref: AWS::StackName
                       - '-ecs-sandbox'
-                ParameterOverrides: !Sub
-                  - |
-                    {
-                      "Environment": "sandbox"
-                      "VPCStack" : "${VPCStack}"
-                    }
-                  - {
-                      VPCStack: { "Join" : ["", [{"Ref": "AWS::StackName"}, "-vpc-sandbox"]]}
-                    }
+                ParameterOverrides: !Sub |
+                  {
+                    "Environment": "prod"
+                    "VPCStack" : "${AWS::StackName}-vpc-sandbox"
+                  }
               RunOrder: 1
