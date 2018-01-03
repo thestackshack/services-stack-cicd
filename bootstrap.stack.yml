@@ -291,7 +291,8 @@ Resources:
                       - '-ecs-prod'
                 ParameterOverrides: !Sub |
                   {
-                    "Environment": "prod"
+                    "Environment": "prod",
+                    "KeyPairName": "${KeyPairName}",
                     "VPCStack" : "${AWS::StackName}-vpc-prod"
                   }
               RunOrder: 1
@@ -368,7 +369,8 @@ Resources:
                       - '-ecs-sandbox'
                 ParameterOverrides: !Sub |
                   {
-                    "Environment": "prod"
+                    "Environment": "sandbox",
+                    "KeyPairName": "${KeyPairName}",
                     "VPCStack" : "${AWS::StackName}-vpc-sandbox"
                   }
               RunOrder: 1

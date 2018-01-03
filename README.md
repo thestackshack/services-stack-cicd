@@ -4,15 +4,25 @@ Create an ECS Microservices stack with built-in CI/CD for the Infrastructure (Ia
 ## Setup
 1. Fork and clone this repo.
 2. Fork and clone the [service1-stack-cicd](https://github.com/thestackshack/service1-stack-cicd)
-2. Install [CIM](https://github.com/thestackshack/cim) (CloudFormation Utility)
-3. Install the [kms](kms/README.md) stack.
-4. Install the [bootstrap.stack.yml](bootstrap.stack.yml) stack.
+3. Install [CIM](https://github.com/thestackshack/cim) (CloudFormation Utility)
+4. Install the [kms](kms/README.md) stack.
+5. Create an EC2 keypair.
+6. Install the [bootstrap.stack.yml](bootstrap.stack.yml) stack.
 
 ## Encrypt Secrets
 In order to protect your configuration secrets like your GitHub token we need to create a KMS key first.
 
+You can use the CloudFormation script in [kms](kms/README.md) or just create it via the console.
+
+## EC2 Keypair
+Use the console to create an EC2 keypair for all your EC2 instances.
+
 ## Stack Up
-Create the [bootstrap.stack.yml](bootstrap.stack.yml) stack.  First update [_cim.yml](_cim.yml) with your GitHub information.  
+Create the [bootstrap.stack.yml](bootstrap.stack.yml) stack.  
+
+First update [_cim.yml](_cim.yml) with your GitHub information and your EC2 keypair.  
+
+Also take a look at the [vpc parameters](stacks/vpc/_cim.yml).  You might need to change the AvailabilityZones. 
 
 This stack will build 2 pipelines:
 
