@@ -1,0 +1,301 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Services Stack CI/CD - Boostrap
+
+Parameters:
+  GitHubOwner:
+    Description: The name of the GitHub repository owner
+    Type: String
+  GitHubToken:
+    Type: String
+    Description: GitHub repository OAuth token
+    NoEcho: true
+  GitHubRepo:
+    Type: String
+    Description: GitHub repository name
+
+Resources:
+
+  #
+  # Bucket used by the pipelines to store artifacts.
+  #
+  PipelinesBucket:
+    Description: The artifact bucket required for inter-stage data exchange
+    Type: AWS::S3::Bucket
+
+  #
+  # IAM Role needed by the pipelines
+  #
+  CodePipelineRole:
+    Description: The role CodePipeline will assume during pipeline execution
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+            Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+            Action: sts:AssumeRole
+
+  CodePipelinePolicy:
+    Description: Policy for the CodePipeline Role
+    DependsOn: CodePipelineRole
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName:
+        Fn::Join:
+          - ''
+          - - Ref: AWS::StackName
+            - '-pipeline-policy'
+      Roles:
+        - !Ref CodePipelineRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - s3:*
+            Effect: Allow
+            Resource:
+              - !GetAtt PipelinesBucket.Arn
+              - !Join ["", [!GetAtt PipelinesBucket.Arn, "*"]]
+          - Action:
+              - cloudformation:*
+            Effect: Allow
+            Resource:
+              - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/video-*
+          - Action:
+              - codepipeline:*
+            Effect: Allow
+            Resource:
+              - !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:video-*
+          - Action:
+              - codebuild:StartBuild
+              - codebuild:BatchGetBuilds
+              - codebuild:StopBuild
+            Effect: Allow
+            Resource:
+              - '*'
+          - Action:
+              - iam:PassRole
+            Effect: Allow
+            Resource:
+              - !GetAtt CloudFormationRole.Arn
+
+  #
+  # IAM Role needed by cloudformation
+  #
+  CloudFormationRole:
+    Description: The role cloudformation will assume during pipeline execution
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+            Effect: Allow
+            Principal:
+              Service:
+                - cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+  CloudFormationPolicy:
+    Description: Policy for the cloudformation execution Role
+    DependsOn: CloudFormationRole
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName:
+        Fn::Join:
+          - ''
+          - - Ref: AWS::StackName
+            - '-cloudformation-policy'
+      Roles:
+        - !Ref CloudFormationRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - '*'
+            Resource:
+              - '*'
+
+  #
+  # Pipelines that create/update the cloudformation stacks within the project
+  # Prod environment.
+  #
+  PipelineProd:
+    Description: The pipeline that will generate other stacks
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      RestartExecutionOnUpdate: True
+      RoleArn: !GetAtt CodePipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref PipelinesBucket
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: CloneRepository
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Version: 1
+                Provider: GitHub
+              OutputArtifacts:
+                - Name: GroupSource
+              Configuration:
+                Owner: !Ref GitHubOwner
+                Branch: 'master'
+                Repo: !Ref GitHubRepo
+                OAuthToken: !Ref GitHubToken
+              RunOrder: 1
+        - Name: VPC
+          Actions:
+            - Name: VPC
+              InputArtifacts:
+                - Name: GroupSource
+              OutputArtifacts:
+                - Name: VPCOutput
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                TemplatePath: !Sub "GroupSource::stacks/vpc.stack.json"
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                StackName:
+                  Fn::Join:
+                    - ''
+                    - - Ref: AWS::StackName
+                      - '-vpc-prod'
+                ParameterOverrides: !Sub |
+                  {
+                      "Environment": "prod"
+                  }
+              RunOrder: 1
+        - Name: ECS
+          Actions:
+            - Name: ECS
+              InputArtifacts:
+                - Name: GroupSource
+                - Name: VPCSource
+              OutputArtifacts:
+                - Name: ECSOutput
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                TemplatePath: !Sub "GroupSource::stacks/ecs.stack.yml"
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                StackName:
+                  Fn::Join:
+                    - ''
+                    - - Ref: AWS::StackName
+                      - '-ecs-prod'
+                ParameterOverrides: !Sub
+                  - |
+                    {
+                      "Environment": "prod"
+                      "VPCStack" : "${VPCStack}"
+                    }
+                  - {
+                      VPCStack: { "Join" : ["", [{"Ref": "AWS::StackName"}, "-vpc-prod"]]}
+                    }
+              RunOrder: 1
+
+  #
+  # Pipelines that create/update the cloudformation stacks within the project
+  # Sandbox environment.
+  #
+  PipelineSandbox:
+    Description: The pipeline that will generate other stacks
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      RestartExecutionOnUpdate: True
+      RoleArn: !GetAtt CodePipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref PipelinesBucket
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: CloneRepository
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Version: 1
+                Provider: GitHub
+              OutputArtifacts:
+                - Name: GroupSource
+              Configuration:
+                Owner: !Ref GitHubOwner
+                Branch: 'master'
+                Repo: !Ref GitHubRepo
+                OAuthToken: !Ref GitHubToken
+              RunOrder: 1
+        - Name: VPC
+          Actions:
+            - Name: VPC
+              InputArtifacts:
+                - Name: GroupSource
+              OutputArtifacts:
+                - Name: VPCOutput
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                TemplatePath: !Sub "GroupSource::stacks/vpc.stack.json"
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                StackName:
+                  Fn::Join:
+                    - ''
+                    - - Ref: AWS::StackName
+                      - '-vpc-sandbox'
+                ParameterOverrides: !Sub |
+                  {
+                      "Environment": "sandbox"
+                  }
+              RunOrder: 1
+        - Name: ECS
+          Actions:
+            - Name: ECS
+              InputArtifacts:
+                - Name: GroupSource
+                - Name: VPCSource
+              OutputArtifacts:
+                - Name: ECSOutput
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                TemplatePath: !Sub "GroupSource::stacks/ecs.stack.yml"
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                StackName:
+                  Fn::Join:
+                    - ''
+                    - - Ref: AWS::StackName
+                      - '-ecs-sandbox'
+                ParameterOverrides: !Sub
+                  - |
+                    {
+                      "Environment": "sandbox"
+                      "VPCStack" : "${VPCStack}"
+                    }
+                  - {
+                      VPCStack: { "Join" : ["", [{"Ref": "AWS::StackName"}, "-vpc-sandbox"]]}
+                    }
+              RunOrder: 1

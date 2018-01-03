@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: 'Services CI/CD KMS Key'
+
+
+Parameters:
+  KeyAdmins:
+    Type: CommaDelimitedList
+    Description: Key Admins
+  KeyUsers:
+    Type: CommaDelimitedList
+    Description: Key Users
+
+#
+# CloudFormation resources
+#
+Resources:
+
+  KmsKey:
+    Type: 'AWS::KMS::Key'
+    Properties: 
+      Description: 'Services CI/CD Key'
+      KeyPolicy: 
+        Version: '2012-10-17'
+        Id: 'key-default-1'
+        Statement:
+          - 
+            Sid: 'Allow administration of the key'
+            Effect: 'Allow'
+            Principal:
+              AWS: !Ref KeyAdmins
+            Action: 
+              - 'kms:Create*'
+              - 'kms:Describe*'
+              - 'kms:Enable*'
+              - 'kms:List*'
+              - 'kms:Put*'
+              - 'kms:Update*'
+              - 'kms:Revoke*'
+              - 'kms:Disable*'
+              - 'kms:Get*'
+              - 'kms:Delete*'
+              - 'kms:ScheduleKeyDeletion'
+              - 'kms:CancelKeyDeletion'
+            Resource: '*'
+          - 
+            Sid: 'Allow use of the key'
+            Effect: 'Allow'
+            Principal: 
+              AWS: !Ref KeyUsers
+            Action: 
+              - 'kms:Encrypt'
+              - 'kms:Decrypt'
+              - 'kms:ReEncrypt*'
+              - 'kms:GenerateDataKey*'
+              - 'kms:DescribeKey'
+            Resource: '*'
+
+  KmsKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: 'alias/services-cicd'
+      TargetKeyId:
+        Ref: KmsKey
+
+#
+# Outputs to be used by other CloudFormation templates if needed.
+#
+Outputs:
+  KmsKey:
+    Description: KmsKey
+    Value: !Ref KmsKey
+    Export:
+      Name: !Sub '${AWS::StackName}-KmsKey'
+  KmsKeyArn:
+    Description: KmsKeyArn
+    Value: !GetAtt KmsKey.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-KmsKeyArn'
