@@ -273,7 +273,7 @@ Resources:
                 - Name: GitSource
                 - Name: VPCSource
               OutputArtifacts:
-                - Name: ECSOutput
+                - Name: ECSSource
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
@@ -294,6 +294,38 @@ Resources:
                     "Environment": "prod",
                     "KeyPairName": "${KeyPairName}",
                     "VPCStack" : "${AWS::StackName}-vpc-prod"
+                  }
+              RunOrder: 1
+        - Name: Service1
+          Actions:
+            - Name: ECS
+              InputArtifacts:
+                - Name: GitSource
+                - Name: VPCSource
+                - Name: ECSSource
+              OutputArtifacts:
+                - Name: Service1Output
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                TemplatePath: "GitSource::stacks/service1.bootstrap.stack.yml"
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                StackName:
+                  Fn::Join:
+                    - ''
+                    - - Ref: AWS::StackName
+                      - '-service1-prod'
+                ParameterOverrides: !Sub |
+                  {
+                    "Environment": "prod",
+                    "VPCStack" : "${AWS::StackName}-vpc-prod",
+                    "ECSStack" : "${AWS::StackName}-ecs-prod",
+                    "GitHubToken" : "${GitHubToken}"
                   }
               RunOrder: 1
 
@@ -351,7 +383,7 @@ Resources:
                 - Name: GitSource
                 - Name: VPCSource
               OutputArtifacts:
-                - Name: ECSOutput
+                - Name: ECSSource
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
@@ -372,5 +404,37 @@ Resources:
                     "Environment": "sandbox",
                     "KeyPairName": "${KeyPairName}",
                     "VPCStack" : "${AWS::StackName}-vpc-sandbox"
+                  }
+              RunOrder: 1
+        - Name: Service1
+          Actions:
+            - Name: ECS
+              InputArtifacts:
+                - Name: GitSource
+                - Name: VPCSource
+                - Name: ECSSource
+              OutputArtifacts:
+                - Name: Service1Output
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                TemplatePath: "GitSource::stacks/service1.bootstrap.stack.yml"
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                StackName:
+                  Fn::Join:
+                    - ''
+                    - - Ref: AWS::StackName
+                      - '-service1-sandbox'
+                ParameterOverrides: !Sub |
+                  {
+                    "Environment": "sandbox",
+                    "VPCStack" : "${AWS::StackName}-vpc-sandbox",
+                    "ECSStack" : "${AWS::StackName}-ecs-sandbox",
+                    "GitHubToken" : "${GitHubToken}"
                   }
               RunOrder: 1

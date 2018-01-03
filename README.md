@@ -33,6 +33,6 @@ Each pipeline will execute the following steps every time you commit changes to 
 
 - Create/Update the [stacks/vpc.stack.json](stacks/vpc/vpc.stack.json) stack.
 - Create/Update the [stacks/ecs.stack.yml](stacks/ecs.stack.yml) stack.
-- Create/Update the [stacks/service1.bootstrap.stack.yml](stacks/service1.bootstrap.stack.yml) stack.
+- Create/Update the [stacks/service1.bootstrap.stack.yml](stacks/service1.stack.yml) stack.
 
-The [stacks/service1.bootstrap.stack.yml](stacks/service1.bootstrap.stack.yml) stack creates a pipeline that 
+The [stacks/service1.bootstrap.stack.yml](stacks/service1.stack.yml) stack creates a pipeline that 
