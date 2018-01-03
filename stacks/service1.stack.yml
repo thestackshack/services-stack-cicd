@@ -27,6 +27,14 @@ Parameters:
     Type: String
     Description: ECS Stack Name
 
+  AppName:
+    Type: String
+    Description: Application name
+
+  ServiceName:
+    Type: String
+    Description: Service name
+
 Mappings:
   Branch:
     prod:
@@ -188,14 +196,18 @@ Resources:
                 StackName:
                   Fn::Join:
                     - ''
-                    - - Ref: AWS::StackName
-                      - '-bootstrap'
+                    - - Ref: AppName
+                      - '-'
+                      - Ref: ServiceName
+                      - '-'
+                      - Ref: Environment
                 ParameterOverrides: !Sub |
                   {
                     "Environment": "${Environment}",
                     "VPCStack" : "${VPCStack}",
                     "ECSStack" : "${ECSStack}",
                     "GitHubToken" : "${GitHubToken}",
-                    "ServiceName" : "service1"
+                    "AppName": "${AppName}",
+                    "ServiceName" : "${ServiceName}"
                   }
               RunOrder: 1

@@ -1,6 +1,6 @@
 version: 0.1
 stack:
-  name: services-cicd # Note: Update this with your stack name
+  name: app-bootstrap # Note: Update this with your stack name
   template:
     file: bootstrap.stack.yml
     # Stacks are uploaded here prior to deployment.  The bucket is created if it doesn't exist.
@@ -16,6 +16,7 @@ stack:
     GitHubToken: '${kms.decrypt(AQICAHgiu9XuQb4FZRXrLn/77g1P99ZhS7/g3xOsvbvNpb+/qQH+sxP+if0SN0/QR0I3M9ehAAAAhzCBhAYJKoZIhvcNAQcGoHcwdQIBADBwBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDNTJCu1YrFM64MUL4AIBEIBD8zDL0Oc+8rQwr/7fJq+NyPB7vKJ/lNqqcmBBN9QS8XDFAqB9Vh9fkCUSilXs3HG3NL6EdLYaR9Z5blo7p2/HTmJrnw==)}'
 
     KeyPairName: 'bluefineng'
+    AppName: 'app'
 
     # Build Notification
 #    NotificationEmail: 'xxxx@gmail.com'

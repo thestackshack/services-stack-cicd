@@ -15,6 +15,9 @@ Parameters:
   KeyPairName:
     Type: String
     Description: EC2 KeyPair
+  AppName:
+    Type: String
+    Description: Application name
 
 Resources:
 
@@ -176,14 +179,14 @@ Resources:
             Value:
               Fn::Join:
                 - ''
-                - - Ref: AWS::StackName
+                - - Ref: AppName
                   - '-vpc-prod'
           - Name: KeyPairName
             Value: !Ref KeyPairName
       Name:
         Fn::Join:
           - ''
-          - - Ref: AWS::StackName
+          - - Ref: AppName
             - '-code-build-prod'
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
@@ -204,14 +207,14 @@ Resources:
             Value:
               Fn::Join:
                 - ''
-                - - Ref: AWS::StackName
+                - - Ref: AppName
                   - '-vpc-sandbox'
           - Name: KeyPairName
             Value: !Ref KeyPairName
       Name:
         Fn::Join:
           - ''
-          - - Ref: AWS::StackName
+          - - Ref: AppName
             - '-code-build-sandbox'
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
@@ -287,13 +290,13 @@ Resources:
                 StackName:
                   Fn::Join:
                     - ''
-                    - - Ref: AWS::StackName
+                    - - Ref: AppName
                       - '-ecs-prod'
                 ParameterOverrides: !Sub |
                   {
                     "Environment": "prod",
                     "KeyPairName": "${KeyPairName}",
-                    "VPCStack" : "${AWS::StackName}-vpc-prod"
+                    "VPCStack" : "${AppName}-vpc-prod"
                   }
               RunOrder: 1
         - Name: Service1
@@ -318,14 +321,16 @@ Resources:
                 StackName:
                   Fn::Join:
                     - ''
-                    - - Ref: AWS::StackName
-                      - '-service1-prod'
+                    - - Ref: AppName
+                      - '-service1-bootstrap-prod'
                 ParameterOverrides: !Sub |
                   {
                     "Environment": "prod",
-                    "VPCStack" : "${AWS::StackName}-vpc-prod",
-                    "ECSStack" : "${AWS::StackName}-ecs-prod",
-                    "GitHubToken" : "${GitHubToken}"
+                    "VPCStack" : "${AppName}-vpc-prod",
+                    "ECSStack" : "${AppName}-ecs-prod",
+                    "GitHubToken" : "${GitHubToken}",
+                    "AppName" : "${AppName}",
+                    "ServiceName" : "service1"
                   }
               RunOrder: 1
 
@@ -397,13 +402,13 @@ Resources:
                 StackName:
                   Fn::Join:
                     - ''
-                    - - Ref: AWS::StackName
+                    - - Ref: AppName
                       - '-ecs-sandbox'
                 ParameterOverrides: !Sub |
                   {
                     "Environment": "sandbox",
                     "KeyPairName": "${KeyPairName}",
-                    "VPCStack" : "${AWS::StackName}-vpc-sandbox"
+                    "VPCStack" : "${AppName}-vpc-sandbox"
                   }
               RunOrder: 1
         - Name: Service1
@@ -428,13 +433,14 @@ Resources:
                 StackName:
                   Fn::Join:
                     - ''
-                    - - Ref: AWS::StackName
-                      - '-service1-sandbox'
+                    - - Ref: AppName
+                      - '-service1-bootstrap-sandbox'
                 ParameterOverrides: !Sub |
                   {
                     "Environment": "sandbox",
-                    "VPCStack" : "${AWS::StackName}-vpc-sandbox",
-                    "ECSStack" : "${AWS::StackName}-ecs-sandbox",
-                    "GitHubToken" : "${GitHubToken}"
+                    "VPCStack" : "${AppName}-vpc-sandbox",
+                    "ECSStack" : "${AppName}-ecs-sandbox",
+                    "GitHubToken" : "${GitHubToken}",
+                    "AppName" : "${AppName}"
                   }
               RunOrder: 1
