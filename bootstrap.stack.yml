@@ -12,6 +12,9 @@ Parameters:
   GitHubRepo:
     Type: String
     Description: GitHub repository name
+  KeyPairName:
+    Type: String
+    Description: EC2 KeyPair
 
 Resources:
 
@@ -175,6 +178,8 @@ Resources:
                 - ''
                 - - Ref: AWS::StackName
                   - '-vpc-prod'
+          - Name: KeyPairName
+            Value: !Ref KeyPairName
       Name:
         Fn::Join:
           - ''
@@ -201,6 +206,8 @@ Resources:
                 - ''
                 - - Ref: AWS::StackName
                   - '-vpc-sandbox'
+          - Name: KeyPairName
+            Value: !Ref KeyPairName
       Name:
         Fn::Join:
           - ''
@@ -317,7 +324,7 @@ Resources:
                 - Name: GitSource
               Configuration:
                 Owner: !Ref GitHubOwner
-                Branch: 'master'
+                Branch: 'develop'
                 Repo: !Ref GitHubRepo
                 OAuthToken: !Ref GitHubToken
               RunOrder: 1

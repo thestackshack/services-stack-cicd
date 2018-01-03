@@ -15,6 +15,8 @@ stack:
     GitHubRepo: 'services-stack-cicd'
     GitHubToken: '${kms.decrypt(AQICAHgiu9XuQb4FZRXrLn/77g1P99ZhS7/g3xOsvbvNpb+/qQH+sxP+if0SN0/QR0I3M9ehAAAAhzCBhAYJKoZIhvcNAQcGoHcwdQIBADBwBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDNTJCu1YrFM64MUL4AIBEIBD8zDL0Oc+8rQwr/7fJq+NyPB7vKJ/lNqqcmBBN9QS8XDFAqB9Vh9fkCUSilXs3HG3NL6EdLYaR9Z5blo7p2/HTmJrnw==)}'
 
+    KeyPairName: 'bluefineng'
+
     # Build Notification
 #    NotificationEmail: 'xxxx@gmail.com'
 #    NotificationSMS: '1-410-336-xxxx'

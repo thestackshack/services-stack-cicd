@@ -16,7 +16,7 @@ stack:
 #
   parameters:
     AvailabilityZones: 'us-east-1a, us-east-1b'
-    KeyPairName: 'bluefineng'
+    KeyPairName: '${env.KeyPairName}'
     NumberOfAZs: '2'
 
 #
