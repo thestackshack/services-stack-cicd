@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Services Stack CI/CD - Boostrap
+Description: Pipeline to update the service1 bootstrap stack
 
 Parameters:
   GitHubOwner:
