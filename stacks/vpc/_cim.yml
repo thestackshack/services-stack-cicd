@@ -2,7 +2,7 @@ version: 0.1
 stack:
   name: "${env.StackName}" # Note: Update this with your stack name
   template:
-    file: vpc.stack.yml
+    file: vpc.stack.json
     bucket: services-cicd # Note: Update this with your bucket name. # Note: Update this with your bucket name.  Stacks are uploaded here prior to deployment.'
 
 #
