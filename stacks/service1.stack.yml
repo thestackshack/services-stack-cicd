@@ -189,13 +189,13 @@ Resources:
                   Fn::Join:
                     - ''
                     - - Ref: AWS::StackName
-                      - '-service1-bootstrap-'
-                      - Ref: Environment
+                      - '-bootstrap'
                 ParameterOverrides: !Sub |
                   {
                     "Environment": "${Environment}",
                     "VPCStack" : "${VPCStack}",
                     "ECSStack" : "${ECSStack}",
-                    "GitHubToken" : "${GitHubToken}"
+                    "GitHubToken" : "${GitHubToken}",
+                    "ServiceName" : "service1"
                   }
               RunOrder: 1
