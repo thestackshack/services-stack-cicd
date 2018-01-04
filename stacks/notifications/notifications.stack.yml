@@ -202,6 +202,10 @@ Resources:
             Action:
               - logs:*
             Resource: '*'
+          - Effect: Allow
+            Action:
+              - sns:*
+            Resource: !Ref NotificationTopic
       Roles:
       - Ref: IamRoleEventLambdaExecution
 
@@ -211,13 +215,13 @@ Resources:
   EventsFunction:
     Type: AWS::Lambda::Function
     DependsOn:
-      - IamPolicyEventLambdaExecution
+      - IamRoleEventLambdaExecution
     Properties:
       Handler: index.events
       Timeout: 5
       Role:
         Fn::GetAtt:
-          - IamPolicyEventLambdaExecution
+          - IamRoleEventLambdaExecution
           - Arn
       Code:
         ZipFile: !Sub |
@@ -313,11 +317,7 @@ Resources:
             Value: !Ref EventsFunction
           - Name: SlackFunction
             Value: !Ref SlackFunction
-      Name:
-        Fn::Join:
-          - ''
-          - - Ref: AWS::StackName
-            - '-code-build'
+      Name: !Ref "${AWS::StackName}-code-build"
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
         Type: CODEPIPELINE

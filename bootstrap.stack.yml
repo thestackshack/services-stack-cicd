@@ -303,9 +303,7 @@ Resources:
                 Provider: CodeBuild
                 Version: 1
               Configuration:
-                ProjectName:
-                  Fn::ImportValue:
-                    !Sub "${AppName}-notifications-prod-CodeBuild"
+                ProjectName: !Sub "${AppName}-notifications-prod-code-build"
               InputArtifacts:
                 - Name: GitSource
               RunOrder: 2
@@ -458,9 +456,7 @@ Resources:
                 Provider: CodeBuild
                 Version: 1
               Configuration:
-                ProjectName:
-                  Fn::ImportValue:
-                    !Sub "${AppName}-notifications-sandbox-CodeBuild"
+                ProjectName: !Sub "${AppName}-notifications-sandbox-code-build"
               InputArtifacts:
                 - Name: GitSource
               RunOrder: 2
