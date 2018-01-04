@@ -1,0 +1,335 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Build and Deployment notifications (SMS, Email, Slack)
+Parameters:
+
+  AppName:
+    Type: String
+    Description: Application name
+
+  Environment:
+    Type: String
+    Description: Environment
+
+  NotificationSlack:
+    Type: String
+    Description: Notification slack endpoint
+    Default: ''
+  NotificationEmail:
+    Type: String
+    Description: Notification email endpoint
+    Default: 'rgfindley@gmail.com'
+  NotificationSMS:
+    Type: String
+    Description: Notification sns endpoint
+    Default: '4103361660'
+
+Conditions:
+  NeedsBuildNotificationEmail:  !Not [!Equals [!Ref NotificationEmail, '']]
+  NeedsBuildNotificationSMS:  !Not [!Equals [!Ref NotificationSMS, '']]
+  NeedsBuildNotificationSlack:  !Not [!Equals [!Ref NotificationSlack, '']]
+
+Resources:
+
+  #
+  # Event Topic
+  # All devops events like stack updates, code builds, code deployments will be posted here for processing.
+  # Once the event is processed and ready to be sent to the user it is posted to the NotificationTopic below.
+  #
+  EventTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${AppName}-devops-events"
+
+  #
+  # Notification Topic
+  # Once our EventTopic and EventFunction process the event it will post a message to this topic.
+  # This topic actually sends the message to either SMS, Email, or Slack.
+  #
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${AppName}-devops-notifications"
+
+  #
+  # Email subscription?
+  #
+  EmailSubscription:
+    Type: AWS::SNS::Subscription
+    Condition: NeedsBuildNotificationEmail
+    Properties:
+      Endpoint: !Ref NotificationEmail
+      Protocol: email
+      TopicArn: !Ref NotificationTopic
+
+  #
+  # SMS subscription?
+  #
+  SMSSubscription:
+    Type: AWS::SNS::Subscription
+    Condition: NeedsBuildNotificationSMS
+    Properties:
+      Endpoint: !Ref NotificationSMS
+      Protocol: sms
+      TopicArn: !Ref NotificationTopic
+
+  #
+  # Slack subscription?
+  #
+
+  #
+  # Role that our Lambda will assume to provide access to other AWS resources
+  #
+  IamRoleSlackLambdaExecution:
+    Type: AWS::IAM::Role
+    Condition: NeedsBuildNotificationSlack
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: '/'
+
+  #
+  # Create a Policy and attach it to our Lambda Role.
+  #
+  IamPolicySlackLambdaExecution:
+    Type: AWS::IAM::Policy
+    Condition: NeedsBuildNotificationSlack
+    DependsOn: IamRoleSlackLambdaExecution
+    Properties:
+      PolicyName: IamPolicyLambdaExecution
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:*
+            Resource: '*'
+      Roles:
+      - Ref: IamRoleSlackLambdaExecution
+
+  #
+  # Lambda function that sends notification to Slack.
+  #
+  SlackFunction:
+    Type: AWS::Lambda::Function
+    Condition: NeedsBuildNotificationSlack
+    DependsOn:
+      - IamPolicySlackLambdaExecution
+    Properties:
+      Handler: index.slack
+      Timeout: 5
+      Role:
+        Fn::GetAtt:
+          - IamRoleSlackLambdaExecution
+          - Arn
+      Code:
+        ZipFile: !Sub |
+          'use strict';
+
+          exports.slack = function(event, context) {
+              console.log(JSON.stringify(event));
+              context.succeed('To be replaced by CodeBuild pipeline phase.');
+          };
+      Runtime: nodejs6.10
+      Environment:
+        Variables:
+          SLACK_HOOK_URL: !Ref NotificationSlack
+
+  #
+  # Subscribe our new Lambda function to the SNS topic.
+  #
+  SlackSubscription:
+    Type: AWS::SNS::Subscription
+    Condition: NeedsBuildNotificationSlack
+    DependsOn: SlackFunction
+    Properties:
+      Endpoint: !GetAtt SlackFunction.Arn
+      Protocol: lambda
+      TopicArn: !Ref NotificationTopic
+
+  #
+  # Give SNS permission to invoke our Lambda
+  #
+  PermissionForSNSToInvokeSlackLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref SlackFunction
+      Action: 'lambda:InvokeFunction'
+      Principal: 'sns.amazonaws.com'
+      SourceArn: !Ref NotificationTopic
+
+
+  #
+  # Event Topic Lambda subscription
+  #
+
+  #
+  # Role that our Lambda will assume to provide access to other AWS resources
+  #
+  IamRoleEventLambdaExecution:
+    Type: AWS::IAM::Role
+    Condition: NeedsBuildNotificationSlack
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: '/'
+
+  #
+  # Create a Policy and attach it to our Lambda Role.
+  #
+  IamPolicyEventLambdaExecution:
+    Type: AWS::IAM::Policy
+    DependsOn: IamRoleEventLambdaExecution
+    Properties:
+      PolicyName: IamPolicyLambdaExecution
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:*
+            Resource: '*'
+      Roles:
+      - Ref: IamRoleEventLambdaExecution
+
+  #
+  # Lambda function that processes the devops events.
+  #
+  EventsFunction:
+    Type: AWS::Lambda::Function
+    DependsOn:
+      - IamPolicyEventLambdaExecution
+    Properties:
+      Handler: index.events
+      Timeout: 5
+      Role:
+        Fn::GetAtt:
+          - IamPolicyEventLambdaExecution
+          - Arn
+      Code:
+        ZipFile: !Sub |
+          'use strict';
+
+          exports.events = function(event, context) {
+              console.log(JSON.stringify(event));
+              context.succeed('To be replaced by CodeBuild pipeline phase.');
+          };
+      Runtime: nodejs6.10
+      Environment:
+        Variables:
+          NotificationTopic: !Ref NotificationTopic
+          AppName: !Ref AppName
+          Environment: !Ref Environment
+
+  #
+  # Subscribe our new Lambda function to the SNS topic.
+  #
+  EventsSubscription:
+    Type: AWS::SNS::Subscription
+    DependsOn: EventsFunction
+    Properties:
+      Endpoint: !GetAtt EventsFunction.Arn
+      Protocol: lambda
+      TopicArn: !Ref EventTopic
+
+  #
+  # Give SNS permission to invoke our Lambda
+  #
+  PermissionForSNSToInvokeEventsLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref EventsFunction
+      Action: 'lambda:InvokeFunction'
+      Principal: 'sns.amazonaws.com'
+      SourceArn: !Ref EventTopic
+
+  #
+  # IAM role needed by our CodeBuild
+  #
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+  CodeBuildPolicy:
+    Type: AWS::IAM::Policy
+    Description: Policy for the codebuild execution
+    DependsOn: CodeBuildRole
+    Properties:
+      PolicyName:
+        Fn::Join:
+          - ''
+          - - Ref: AWS::StackName
+            - '-codebuild-policy'
+      Roles:
+        - !Ref CodeBuildRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - '*'
+            Resource:
+              - '*'
+
+  #
+  # Code Build project.
+  # This builds, packages, and deploys our Lambda.
+  #
+  CodeBuild:
+    Type: AWS::CodeBuild::Project
+    DependsOn:
+      - EventsFunction
+      - SlackFunction
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/nodejs:6.3.1
+        Type: LINUX_CONTAINER
+        EnvironmentVariables:
+          - Name: EventsFunction
+            Value: !Ref EventsFunction
+          - Name: SlackFunction
+            Value: !Ref SlackFunction
+      Name:
+        Fn::Join:
+          - ''
+          - - Ref: AWS::StackName
+            - '-code-build'
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: stacks/notifications/buildspec.yml
+      TimeoutInMinutes: 5 # must be between 5 minutes and 8 hours
+
+Outputs:
+  EventTopic:
+    Value: !Ref 'EventTopic'
+    Export:
+      Name: !Sub '${AWS::StackName}-EventTopic'
+  CodeBuild:
+    Value: !Ref 'CodeBuild'
+    Export:
+      Name: !Sub '${AWS::StackName}-CodeBuild'

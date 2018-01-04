@@ -1,6 +1,6 @@
 version: 0.1
 stack:
-  name: services-cicd-kms # Note: Update this with your stack name
+  name: kms # Note: Update this with your stack name
   template:
     file: cloudformation.yml
     # Stacks are uploaded here prior to deployment.  The bucket is created if it doesn't exist.

@@ -19,6 +19,19 @@ Parameters:
     Type: String
     Description: Application name
 
+  NotificationSlack:
+    Type: String
+    Description: Notification slack endpoint
+    Default: ''
+  NotificationEmail:
+    Type: String
+    Description: Notification email endpoint
+    Default: ''
+  NotificationSMS:
+    Type: String
+    Description: Notification sns endpoint
+    Default: ''
+
 Resources:
 
   #
@@ -256,6 +269,46 @@ Resources:
                 Repo: !Ref GitHubRepo
                 OAuthToken: !Ref GitHubToken
               RunOrder: 1
+        - Name: Notifications
+          Actions:
+            - Name: Stack
+              InputArtifacts:
+                - Name: GitSource
+              OutputArtifacts:
+                - Name: NotificationsSource
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                TemplatePath: "GitSource::stacks/notifications/notifications.stack.yml"
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                StackName: !Sub "${AppName}-notifications-prod"
+                ParameterOverrides: !Sub |
+                  {
+                    "Environment": "prod",
+                    "AppName" : "${AppName}",
+                    "NotificationSlack" : "${NotificationSlack}",
+                    "NotificationEmail" : "${NotificationEmail}",
+                    "NotificationSMS" : "${NotificationSMS}"
+                  }
+              RunOrder: 1
+            - Name: BuildDeploy
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName:
+                  Fn::ImportValue:
+                    !Sub "${AppName}-notifications-prod-CodeBuild"
+              InputArtifacts:
+                - Name: GitSource
+              RunOrder: 2
         - Name: VPC
           Actions:
             - Name: VPC
@@ -332,7 +385,8 @@ Resources:
                     "ECSStack" : "${AppName}-ecs-prod",
                     "GitHubToken" : "${GitHubToken}",
                     "AppName" : "${AppName}",
-                    "ServiceName" : "service1"
+                    "ServiceName" : "service1",
+                    "NotificationStack" : "${AppName}-notifications-prod"
                   }
               RunOrder: 1
 
@@ -370,6 +424,46 @@ Resources:
                 Repo: !Ref GitHubRepo
                 OAuthToken: !Ref GitHubToken
               RunOrder: 1
+        - Name: Notifications
+          Actions:
+            - Name: Stack
+              InputArtifacts:
+                - Name: GitSource
+              OutputArtifacts:
+                - Name: NotificationsSource
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                TemplatePath: "GitSource::stacks/notifications/notifications.stack.yml"
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                StackName: !Sub "${AppName}-notifications-sandbox"
+                ParameterOverrides: !Sub |
+                  {
+                    "Environment": "sandbox",
+                    "AppName" : "${AppName}",
+                    "NotificationSlack" : "${NotificationSlack}",
+                    "NotificationEmail" : "${NotificationEmail}",
+                    "NotificationSMS" : "${NotificationSMS}"
+                  }
+              RunOrder: 1
+            - Name: BuildDeploy
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName:
+                  Fn::ImportValue:
+                    !Sub "${AppName}-notifications-sandbox-CodeBuild"
+              InputArtifacts:
+                - Name: GitSource
+              RunOrder: 2
         - Name: VPC
           Actions:
             - Name: VPC
@@ -446,6 +540,7 @@ Resources:
                     "ECSStack" : "${AppName}-ecs-sandbox",
                     "GitHubToken" : "${GitHubToken}",
                     "AppName" : "${AppName}",
-                    "ServiceName" : "service1"
+                    "ServiceName" : "service1",
+                    "NotificationStack" : "${AppName}-notifications-sandbox"
                   }
               RunOrder: 1

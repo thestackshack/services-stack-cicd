@@ -1,0 +1,27 @@
+version: 0.2
+
+# aws/codebuild/eb-nodejs-6.10.0-amazonlinux-64:4.0.0
+phases:
+  install:
+    commands:
+  pre_build:
+    commands:
+      - echo Installing source NPM dependencies...
+      - cd ./stack/notifications && npm install
+  build:
+    commands:
+      - echo Testing the code
+      - npm test
+      - echo Removing dev dependencies
+      - rm -Rf node_modules
+      - npm install --production
+  post_build:
+    commands:
+      - zip -r build.zip .
+      - aws lambda update-function-code --function-name "${EventsFunction}" --zip-file fileb://build.zip --publish
+      - aws lambda update-function-code --function-name "${SlackFunction}" --zip-file fileb://build.zip --publish
+artifacts:
+  base-directory: 'stack/notifications'
+  files:
+    - '**/*'
+  type: zip

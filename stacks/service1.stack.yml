@@ -27,6 +27,10 @@ Parameters:
     Type: String
     Description: ECS Stack Name
 
+  NotificationsStack:
+    Type: String
+    Description: Notifications Stack Name
+
   AppName:
     Type: String
     Description: Application name
@@ -226,16 +230,41 @@ Resources:
             Value: !Ref AppName
           #- Name: SNS_TOPIC_ARN
           #  Value: !If [NeedsBuildNotification, !Ref "BuildTopic", '']
-      Name:
-        Fn::Join:
-          - ''
-          - - Ref: AWS::StackName
-            - '-code-build'
+      Name: !Sub "${AWS::StackName}-code-build"
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
         Type: CODEPIPELINE
         BuildSpec: buildspec.yml
       TimeoutInMinutes: 10 # must be between 5 minutes and 8 hours
+
+
+  #
+  # CloudWatch Event to trigger lambda for build notifications.
+  #
+  BuildEventRule:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Description: 'BuildEventRule'
+      EventPattern:
+        source:
+          - 'aws.codebuild'
+        detail-type:
+          - 'CodeBuild Build State Change'
+        detail:
+          project-name:
+            - !Sub "${AWS::StackName}-code-build"
+          build-status:
+            - 'IN_PROGRESS'
+            - 'SUCCEEDED'
+            - 'FAILED'
+            - 'STOPPED'
+      State: 'ENABLED'
+      Targets:
+        -
+          Arn:
+            Fn::ImportValue:
+              !Sub "${NotificationsStack}-EventTopic"
+          Id: 'service-build-notifications'
 
   #
   # Pipelines that create/update the cloudformation stacks within the project
@@ -282,7 +311,7 @@ Resources:
                 Version: 1
                 Provider: CloudFormation
               Configuration:
-                TemplatePath: "GitSource::stacks/ecr.yml"
+                TemplatePath: "GitSource::stacks/ecr.stack.yml"
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_NAMED_IAM
                 RoleArn: !GetAtt CloudFormationRole.Arn
@@ -324,7 +353,7 @@ Resources:
                 Version: 1
                 Provider: CloudFormation
               Configuration:
-                TemplatePath: "GitSource::stacks/service.yml"
+                TemplatePath: "GitSource::stacks/service.stack.yml"
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_NAMED_IAM
                 RoleArn: !GetAtt CloudFormationRole.Arn

@@ -20,6 +20,7 @@ stack:
 
     # Build Notification
 #    NotificationEmail: 'xxxx@gmail.com'
+    NotificationEmail: 'rgfindley@gmail.com'
 #    NotificationSMS: '1-410-336-xxxx'
 
   #
