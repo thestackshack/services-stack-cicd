@@ -230,6 +230,8 @@ Resources:
     Description: The pipeline that will generate other stacks
     Type: AWS::CodePipeline::Pipeline
     DependsOn:
+      - CodePipelinePolicy
+      - CloudFormationPolicy
       - VPCCodeBuildProd
     Properties:
       RestartExecutionOnUpdate: True
@@ -342,6 +344,8 @@ Resources:
     Description: The pipeline that will generate other stacks
     Type: AWS::CodePipeline::Pipeline
     DependsOn:
+      - CodePipelinePolicy
+      - CloudFormationPolicy
       - VPCCodeBuildSandbox
     Properties:
       RestartExecutionOnUpdate: True
