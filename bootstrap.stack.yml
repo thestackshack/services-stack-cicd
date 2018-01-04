@@ -384,7 +384,7 @@ Resources:
                     "GitHubToken" : "${GitHubToken}",
                     "AppName" : "${AppName}",
                     "ServiceName" : "service1",
-                    "NotificationStack" : "${AppName}-notifications-prod"
+                    "NotificationsStack" : "${AppName}-notifications-prod"
                   }
               RunOrder: 1
 
@@ -537,6 +537,6 @@ Resources:
                     "GitHubToken" : "${GitHubToken}",
                     "AppName" : "${AppName}",
                     "ServiceName" : "service1",
-                    "NotificationStack" : "${AppName}-notifications-sandbox"
+                    "NotificationsStack" : "${AppName}-notifications-sandbox"
                   }
               RunOrder: 1
