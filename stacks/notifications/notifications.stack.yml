@@ -40,6 +40,21 @@ Resources:
     Properties:
       TopicName: !Sub "${AppName}-devops-events"
 
+  EventTopicPolicy:
+    Type: "AWS::SNS::TopicPolicy"
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: "events.amazonaws.com"
+            Action: "sns:Publish"
+            Resource: !Ref EventTopic
+      Topics:
+        - !Ref EventTopic
+
+
   #
   # Notification Topic
   # Once our EventTopic and EventFunction process the event it will post a message to this topic.
