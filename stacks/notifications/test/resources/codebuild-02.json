@@ -1,0 +1,22 @@
+{
+  "Records": [
+    {
+      "EventSource": "aws:sns",
+      "EventVersion": "1.0",
+      "EventSubscriptionArn": "arn:aws:sns:us-east-1:132093761664:app-devops-events:91aff27b-fa19-4a96-b6ae-2e359169a528",
+      "Sns": {
+        "Type": "Notification",
+        "MessageId": "d2e01407-d6f7-57c9-978c-46cfa3b3b4f5",
+        "TopicArn": "arn:aws:sns:us-east-1:132093761664:app-devops-events",
+        "Subject": null,
+        "Message": "{\"version\":\"0\",\"id\":\"6c0feab4-e8c4-30d3-c32d-b67e53d570c8\",\"detail-type\":\"CodeBuild Build State Change\",\"source\":\"aws.codebuild\",\"account\":\"132093761664\",\"time\":\"2018-01-04T18:31:26Z\",\"region\":\"us-east-1\",\"resources\":[\"arn:aws:codebuild:us-east-1:132093761664:build/app-service1-prod-code-build:2d946923-35f3-4815-ae68-dcf825267843\"],\"detail\":{\"build-status\":\"IN_PROGRESS\",\"project-name\":\"app-service1-prod-code-build\",\"build-id\":\"arn:aws:codebuild:us-east-1:132093761664:build/app-service1-prod-code-build:2d946923-35f3-4815-ae68-dcf825267843\",\"additional-information\":{\"artifact\":{\"location\":\"arn:aws:s3:::app-service1-prod-pipelinesbucket-cexapcjridug/app-service1-prod-Pi/BuildOutpu/WELRZ29\"},\"environment\":{\"image\":\"aws/codebuild/docker:1.12.1\",\"privileged-mode\":true,\"compute-type\":\"BUILD_GENERAL1_SMALL\",\"type\":\"LINUX_CONTAINER\",\"environment-variables\":[{\"name\":\"REPOSITORY_URI\",\"type\":\"PLAINTEXT\",\"value\":\"132093761664.dkr.ecr.us-east-1.amazonaws.com/app/service1/prod\"},{\"name\":\"AWS_DEFAULT_REGION\",\"type\":\"PLAINTEXT\",\"value\":\"us-east-1\"},{\"name\":\"APP\",\"type\":\"PLAINTEXT\",\"value\":\"app\"}]},\"timeout-in-minutes\":10.0,\"build-complete\":false,\"initiator\":\"codepipeline/app-service1-prod-Pipeline-J2UKGAB7PGXY\",\"build-start-time\":\"Jan 4, 2018 6:31:26 PM\",\"source\":{\"buildspec\":\"buildspec.yml\",\"type\":\"CODEPIPELINE\"},\"source-version\":\"arn:aws:s3:::app-service1-prod-pipelinesbucket-cexapcjridug/app-service1-prod-Pi/GitSource/fXNVpa4.zip\"},\"current-phase\":\"SUBMITTED\",\"current-phase-context\":\"[]\",\"version\":\"1\"}}",
+        "Timestamp": "2018-01-04T18:31:32.147Z",
+        "SignatureVersion": "1",
+        "Signature": "MDStCoLv8GSrw2E2hET/lSZUOm892odsNSCZSLVOn3LwRHtGti2SCKq4p1z7VAZv9F8u0ejaySn1nNLeAocwMmfyv8n++MUsiyqDkP08Nk1e7NbrttKAOlKMMpGcOCMGQbz7WbUe6c5D847qnUtXv0YAGGBIIrKpQbLUtCP1tjtHJ74XV0vCn0MWx8YQilGeaVACPQogcsUbcg+4ybMLK/zMf7g58Hh61MDua8S8+urAdONQ/I7APYN/oUl0LrnYk0qPAab/4DMG7IYWCNLlnb4cZbUeiNtLRy3pxo/yIcGZg4d97a/h4Azf5BGIA1NXZ0U3UoP1Mi8RnPbGAuxLwQ==",
+        "SigningCertUrl": "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-433026a4050d206028891664da859041.pem",
+        "UnsubscribeUrl": "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:132093761664:app-devops-events:91aff27b-fa19-4a96-b6ae-2e359169a528",
+        "MessageAttributes": {}
+      }
+    }
+  ]
+}

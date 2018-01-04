@@ -239,7 +239,7 @@ Resources:
 
 
   #
-  # CloudWatch Event to trigger lambda for build notifications.
+  # CloudWatch Event for build notifications.
   #
   BuildEventRule:
     Type: 'AWS::Events::Rule'
