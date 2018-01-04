@@ -17,11 +17,11 @@ Parameters:
   NotificationEmail:
     Type: String
     Description: Notification email endpoint
-    Default: 'rgfindley@gmail.com'
+    Default: ''
   NotificationSMS:
     Type: String
     Description: Notification sns endpoint
-    Default: '4103361660'
+    Default: ''
 
 Conditions:
   NeedsBuildNotificationEmail:  !Not [!Equals [!Ref NotificationEmail, '']]
@@ -81,7 +81,6 @@ Resources:
   #
   IamRoleSlackLambdaExecution:
     Type: AWS::IAM::Role
-    Condition: NeedsBuildNotificationSlack
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
@@ -99,7 +98,6 @@ Resources:
   #
   IamPolicySlackLambdaExecution:
     Type: AWS::IAM::Policy
-    Condition: NeedsBuildNotificationSlack
     DependsOn: IamRoleSlackLambdaExecution
     Properties:
       PolicyName: IamPolicyLambdaExecution
@@ -118,7 +116,6 @@ Resources:
   #
   SlackFunction:
     Type: AWS::Lambda::Function
-    Condition: NeedsBuildNotificationSlack
     DependsOn:
       - IamRoleSlackLambdaExecution
       - IamPolicySlackLambdaExecution
@@ -175,7 +172,6 @@ Resources:
   #
   IamRoleEventLambdaExecution:
     Type: AWS::IAM::Role
-    Condition: NeedsBuildNotificationSlack
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
