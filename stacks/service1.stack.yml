@@ -209,6 +209,7 @@ Resources:
   #
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
+    DependsOn: CodeBuildRolePolicy
     Properties:
       Artifacts:
         Type: CODEPIPELINE
@@ -242,6 +243,9 @@ Resources:
   Pipeline:
     Description: The pipeline that will generate other stacks
     Type: AWS::CodePipeline::Pipeline
+    DependsOn:
+      - CodePipelinePolicy
+      - CloudFormationPolicy
     Properties:
       RestartExecutionOnUpdate: True
       RoleArn: !GetAtt CodePipelineRole.Arn
