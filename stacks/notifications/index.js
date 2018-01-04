@@ -20,4 +20,4 @@ functions.events = function(event, context) {
     context.succeed();
 };
 
-exports.handler = functions;
+module.exports = functions;
