@@ -1,6 +1,12 @@
 # Services CI/CD Stack
 Create an ECS Microservices stack with built-in CI/CD for the Infrastructure (IaC) and Code.
 
+## Architecture
+[![](architecture.png)](architecture.png)
+
+## CI/CD CodePipelines
+[![](pipelines.png)](pipelines.png)
+
 ## Setup
 1. Fork and clone this repo.
 2. Fork and clone the [service1-stack-cicd](https://github.com/thestackshack/service1-stack-cicd)

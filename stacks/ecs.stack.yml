@@ -13,6 +13,10 @@ Parameters:
     Type: String
     Description: VPC Stack Name
 
+  NotificationsStack:
+    Type: String
+    Description: Notifications Stack Name
+
   DesiredCapacity:
     Type: Number
     Default: '2'

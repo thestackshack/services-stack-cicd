@@ -349,7 +349,8 @@ Resources:
                   {
                     "Environment": "prod",
                     "KeyPairName": "${KeyPairName}",
-                    "VPCStack" : "${AppName}-vpc-prod"
+                    "VPCStack" : "${AppName}-vpc-prod",
+                    "NotificationsStack" : "${AppName}-notifications-prod"
                   }
               RunOrder: 1
         - Name: Service1
@@ -502,7 +503,8 @@ Resources:
                   {
                     "Environment": "sandbox",
                     "KeyPairName": "${KeyPairName}",
-                    "VPCStack" : "${AppName}-vpc-sandbox"
+                    "VPCStack" : "${AppName}-vpc-sandbox",
+                    "NotificationsStack" : "${AppName}-notifications-sandbox"
                   }
               RunOrder: 1
         - Name: Service1
