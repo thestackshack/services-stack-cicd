@@ -317,7 +317,7 @@ Resources:
           - 'ECS Container Instance State Change'
         detail:
           clusterArn:
-            - !Ref ECSCluster
+            - !GetAtt ECSCluster.Arn
       State: 'ENABLED'
       Targets:
         -
@@ -330,10 +330,10 @@ Resources:
   #
   # CloudWatch Event for ecs task notifications.
   #
-  ECSInstanceEventRule:
+  ECSTaskEventRule:
     Type: 'AWS::Events::Rule'
     Properties:
-      Description: 'ECSInstanceEventRule'
+      Description: 'ECSTaskEventRule'
       EventPattern:
         source:
           - 'aws.ecs'
@@ -341,7 +341,7 @@ Resources:
           - 'ECS Task State Change'
         detail:
           clusterArn:
-            - !Ref ECSCluster
+            - !GetAtt ECSCluster.Arn
       State: 'ENABLED'
       Targets:
         -
