@@ -120,6 +120,7 @@ Resources:
     Type: AWS::Lambda::Function
     Condition: NeedsBuildNotificationSlack
     DependsOn:
+      - IamRoleSlackLambdaExecution
       - IamPolicySlackLambdaExecution
     Properties:
       Handler: index.slack
@@ -216,6 +217,7 @@ Resources:
     Type: AWS::Lambda::Function
     DependsOn:
       - IamRoleEventLambdaExecution
+      - IamPolicyEventLambdaExecution
     Properties:
       Handler: index.events
       Timeout: 5
