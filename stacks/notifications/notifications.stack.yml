@@ -317,7 +317,7 @@ Resources:
             Value: !Ref EventsFunction
           - Name: SlackFunction
             Value: !Ref SlackFunction
-      Name: !Ref "${AWS::StackName}-code-build"
+      Name: !Sub "${AWS::StackName}-code-build"
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
         Type: CODEPIPELINE
