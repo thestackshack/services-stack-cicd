@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Pipeline to update the service1 bootstrap stack
+Description: Service1 bootstrap pipeline.  Update Iac, build docker images, deploy service, etc...
 
 Parameters:
   GitHubOwner:
@@ -33,7 +33,8 @@ Parameters:
 
   ServiceName:
     Type: String
-    Description: Service name
+    Description: Service name.  Lowercase
+    Default: 'service1'
 
 Mappings:
   Branch:
@@ -148,6 +149,94 @@ Resources:
               - '*'
 
   #
+  # CodeBuild Permissions
+  #
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+
+  CodeBuildRolePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: CodeBuildRolePolicy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: '*'
+          - Effect: Allow
+            Action:
+              - s3:*
+            Resource:
+              - !Sub 'arn:aws:s3:::${PipelinesBucket}'
+              - !Sub 'arn:aws:s3:::${PipelinesBucket}/*'
+          - Effect: Allow
+            Action:
+              - ecr:GetAuthorizationToken
+            Resource: '*'
+          - Effect: Allow
+            Action:
+              - ecr:GetDownloadUrlForLayer
+              - ecr:BatchGetImage
+              - ecr:BatchCheckLayerAvailability
+              - ecr:PutImage
+              - ecr:InitiateLayerUpload
+              - ecr:UploadLayerPart
+              - ecr:CompleteLayerUpload
+            Resource: !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${AppName}/${ServiceName}/${Environment}"
+          - Effect: Allow
+            Action:
+              - sns:Publish
+            Resource: !Sub 'arn:aws:sns:${AWS::Region}:${AWS::AccountId}:*'
+      Roles:
+        - !Ref CodeBuildRole
+
+  #
+  # CodeBuild
+  #
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/docker:1.12.1
+        Type: LINUX_CONTAINER
+        EnvironmentVariables:
+          - Name: AWS_DEFAULT_REGION
+            Value: !Ref AWS::Region
+          - Name: REPOSITORY_URI
+            Value: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${AppName}/${ServiceName}/${Environment}"
+          - Name: APP
+            Value: !Ref AppName
+          #- Name: SNS_TOPIC_ARN
+          #  Value: !If [NeedsBuildNotification, !Ref "BuildTopic", '']
+      Name:
+        Fn::Join:
+          - ''
+          - - Ref: AWS::StackName
+            - '-code-build'
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec.yml
+      TimeoutInMinutes: 10 # must be between 5 minutes and 8 hours
+
+  #
   # Pipelines that create/update the cloudformation stacks within the project
   #
   Pipeline:
@@ -176,20 +265,20 @@ Resources:
                 Repo: !Ref GitHubRepo
                 OAuthToken: !Ref GitHubToken
               RunOrder: 1
-        - Name: Service
+        - Name: Build
           Actions:
-            - Name: Service
+            - Name: ECR
               InputArtifacts:
                 - Name: GitSource
               OutputArtifacts:
-                - Name: ServiceOutput
+                - Name: ECRSource
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
                 Version: 1
                 Provider: CloudFormation
               Configuration:
-                TemplatePath: "GitSource::bootstrap.stack.yml"
+                TemplatePath: "GitSource::stacks/ecr.yml"
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_NAMED_IAM
                 RoleArn: !GetAtt CloudFormationRole.Arn
@@ -199,15 +288,63 @@ Resources:
                     - - Ref: AppName
                       - '-'
                       - Ref: ServiceName
-                      - '-'
+                      - '-ecr-'
                       - Ref: Environment
                 ParameterOverrides: !Sub |
                   {
-                    "Environment": "${Environment}",
-                    "VPCStack" : "${VPCStack}",
-                    "ECSStack" : "${ECSStack}",
-                    "GitHubToken" : "${GitHubToken}",
-                    "AppName": "${AppName}",
-                    "ServiceName" : "${ServiceName}"
+                    "RepositoryName": "${AppName}/${ServiceName}/${Environment}"
                   }
+              RunOrder: 1
+            - Name: BuildPushImage
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName: !Ref CodeBuildProject
+              InputArtifacts:
+                - Name: GitSource
+              OutputArtifacts:
+                - Name: BuildOutput
+              RunOrder: 2
+        - Name: Service
+          Actions:
+            - Name: Infrastructure
+              InputArtifacts:
+                - Name: GitSource
+                - Name: BuildOutput
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                TemplatePath: "GitSource::stacks/service.yml"
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                StackName:
+                  Fn::Join:
+                    - ''
+                    - - Ref: AppName
+                      - '-'
+                      - Ref: ServiceName
+                      - '-service-'
+                      - Ref: Environment
+                ParameterOverrides: !Sub
+                  - |
+                    {
+                      "BuildVersion" : { "Fn::GetParam" : ["BuildOutput", "version.json", "version"]},
+                      "VPCStack" : "${VPCStack}",
+                      "ECSStack" : "${ECSStack}",
+                      "RepositoryUrl": "${RepositoryUrl}",
+                      "Environment" : "${Environment}"
+                    }
+                  - {
+                      VPCStack: { "Ref" : "VPCStack"},
+                      ECSStack: { "Ref" : "ECSStack"},
+                      RepositoryUrl: { "Fn::Sub" : [ "${AccountId}.dkr.ecr.${Region}.amazonaws.com/${AppName}/${ServiceName}/${Environment}", { AccountId: {"Ref" : "AWS::AccountId"}, Region: {"Ref" : "AWS::Region"}, ServiceName: {"Ref" : "ServiceName"}, Environment: {"Ref" : "Environment"} } ] },
+                      Environment: { "Ref" : "Environment"}
+                    }
               RunOrder: 1

@@ -322,7 +322,7 @@ Resources:
                   Fn::Join:
                     - ''
                     - - Ref: AppName
-                      - '-service1-bootstrap-prod'
+                      - '-service1-prod'
                 ParameterOverrides: !Sub |
                   {
                     "Environment": "prod",
@@ -434,13 +434,14 @@ Resources:
                   Fn::Join:
                     - ''
                     - - Ref: AppName
-                      - '-service1-bootstrap-sandbox'
+                      - '-service1-sandbox'
                 ParameterOverrides: !Sub |
                   {
                     "Environment": "sandbox",
                     "VPCStack" : "${AppName}-vpc-sandbox",
                     "ECSStack" : "${AppName}-ecs-sandbox",
                     "GitHubToken" : "${GitHubToken}",
-                    "AppName" : "${AppName}"
+                    "AppName" : "${AppName}",
+                    "ServiceName" : "service1"
                   }
               RunOrder: 1
