@@ -16,7 +16,10 @@ functions.parse_codebuild = function(message) {
         text += 'https://console.aws.amazon.com/cloudwatch/home?region='+message.region+'#logEventViewer:group=/aws/codebuild/'+project+';start=PT5M';
     }
 
-    return text;
+    if (_.includes(['IN_PROGRESS', 'FAILED'], status))
+        return text;
+    else
+        return null;
 };
 
 functions.parse_ecs_instance = function(message) {
@@ -26,14 +29,7 @@ functions.parse_ecs_instance = function(message) {
     const runningTasksCount = message.detail.runningTasksCount;
     const agentConnected = message.detail.agentConnected;
     const agentUpdateStatus = message.detail.agentUpdateStatus;
-    return _.join([
-        ec2InstanceId,
-        status,
-        pendingTasksCount,
-        runningTasksCount,
-        agentConnected,
-        agentUpdateStatus
-    ], ', ');
+    return null;
 };
 
 functions.parse_ecs_task = function(message) {
@@ -41,19 +37,19 @@ functions.parse_ecs_task = function(message) {
     const desiredStatus = message.detail.desiredStatus;
     const lastStatus = message.detail.lastStatus;
     const stoppedReason = message.detail.stoppedReason;
-    const version = message.detail.version;
+    const taskDefinitionArn = message.detail.taskDefinitionArn;
     return _.join([
         group,
         desiredStatus,
         lastStatus,
         stoppedReason,
-        version
+        taskDefinitionArn
     ], ', ');
 };
 
 functions.parse = function(message) {
     winston.info('parser.parse');
-    winston.info(message, null, 3);
+    winston.info(message);
     if (_.isString(message))
         return message;
     else if (_.isEqual(message['detail-type'], 'CodeBuild Build State Change'))
