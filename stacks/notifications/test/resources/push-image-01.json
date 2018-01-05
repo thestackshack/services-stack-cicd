@@ -1,0 +1,22 @@
+{
+  "Records": [
+    {
+      "EventSource": "aws:sns",
+      "EventVersion": "1.0",
+      "EventSubscriptionArn": "arn:aws:sns:us-east-1:132093761664:app-devops-events:91aff27b-fa19-4a96-b6ae-2e359169a528",
+      "Sns": {
+        "Type": "Notification",
+        "MessageId": "0823695d-b2b4-5ee7-adc7-3b94c56fa175",
+        "TopicArn": "arn:aws:sns:us-east-1:132093761664:app-devops-events",
+        "Subject": "app-prod version 1ce8d5c6 is ready.",
+        "Message": "app-prod version 1ce8d5c6 is ready.",
+        "Timestamp": "2018-01-05T12:54:51.795Z",
+        "SignatureVersion": "1",
+        "Signature": "QKOw80cpH+6mLkveDw/4VIcVOK61qLye+sqfMZZEXXb9KXf7k5rVvLBkgagEeWadMWQqBlSDzYqSZiIh8gsIl8vOF6nsSaW3Xf+pNEBsV/kWnccPLbUGUf7A/RZevFzZ6I7eGXAzNB/cQb0KQO4VvbscYRbDUR+oY850wjwqDVT3MucYfzu90c0EoFOb4I7vG7/89f/DOTPjljKehDqykjz19hLIFDyboOSwsR4vpmQe6EiVWCOg0B/gyWd4xOuKwOvDDeHf+BbKSyexYHBErAA0gdXEvjm9UEJv5/pOCi/k5zCZrG5jy7C0/yt0FilWl0B3SfP2EyI0DJkjx0RIiA==",
+        "SigningCertUrl": "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-433026a4050d206028891664da859041.pem",
+        "UnsubscribeUrl": "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:132093761664:app-devops-events:91aff27b-fa19-4a96-b6ae-2e359169a528",
+        "MessageAttributes": {}
+      }
+    }
+  ]
+}

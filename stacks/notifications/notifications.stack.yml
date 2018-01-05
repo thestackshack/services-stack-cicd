@@ -152,7 +152,7 @@ Resources:
       Runtime: nodejs6.10
       Environment:
         Variables:
-          SLACK_HOOK_URL: !Ref NotificationSlack
+          NotificationSlack: !Ref NotificationSlack
 
   #
   # Subscribe our new Lambda function to the SNS topic.
