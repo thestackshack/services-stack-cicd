@@ -21,7 +21,7 @@ stack:
     # Build Notification
     NotificationEmail: 'rgfindley@gmail.com'
     #NotificationSMS: '1-410-336-xxxx'
-    NotificationSlack: 'http://slack.com/test'
+    NotificationSlack: 'https://hooks.slack.com/services/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'
 
   #
   # Define stack capabilities required.

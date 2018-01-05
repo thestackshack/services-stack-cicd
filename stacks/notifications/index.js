@@ -16,7 +16,9 @@ var functions = {};
 functions.slack = function(event, context) {
     winston.info('slack');
     winston.info(event.Records[0].Sns.Message);
-    context.succeed();
+    slack.post(event.Records[0].Sns.Message, process.env.NotificationSlack, function(err, results) {
+        context.succeed(err);
+    });
 };
 
 //
