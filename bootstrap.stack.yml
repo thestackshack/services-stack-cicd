@@ -353,9 +353,9 @@ Resources:
                     "NotificationsStack" : "${AppName}-notifications-prod"
                   }
               RunOrder: 1
-        - Name: Service1
+        - Name: Services
           Actions:
-            - Name: ECS
+            - Name: Service1
               InputArtifacts:
                 - Name: GitSource
                 - Name: VPCSource
@@ -385,6 +385,39 @@ Resources:
                     "GitHubToken" : "${GitHubToken}",
                     "AppName" : "${AppName}",
                     "ServiceName" : "service1",
+                    "NotificationsStack" : "${AppName}-notifications-prod"
+                  }
+              RunOrder: 1
+            - Name: Service2
+              InputArtifacts:
+                - Name: GitSource
+                - Name: VPCSource
+                - Name: ECSSource
+              OutputArtifacts:
+                - Name: Service1Output
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                TemplatePath: "GitSource::stacks/service2.stack.yml"
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                StackName:
+                  Fn::Join:
+                    - ''
+                    - - Ref: AppName
+                      - '-service2-prod'
+                ParameterOverrides: !Sub |
+                  {
+                    "Environment": "prod",
+                    "VPCStack" : "${AppName}-vpc-prod",
+                    "ECSStack" : "${AppName}-ecs-prod",
+                    "GitHubToken" : "${GitHubToken}",
+                    "AppName" : "${AppName}",
+                    "ServiceName" : "service2",
                     "NotificationsStack" : "${AppName}-notifications-prod"
                   }
               RunOrder: 1
@@ -507,9 +540,9 @@ Resources:
                     "NotificationsStack" : "${AppName}-notifications-sandbox"
                   }
               RunOrder: 1
-        - Name: Service1
+        - Name: Services
           Actions:
-            - Name: ECS
+            - Name: Service1
               InputArtifacts:
                 - Name: GitSource
                 - Name: VPCSource
@@ -539,6 +572,39 @@ Resources:
                     "GitHubToken" : "${GitHubToken}",
                     "AppName" : "${AppName}",
                     "ServiceName" : "service1",
+                    "NotificationsStack" : "${AppName}-notifications-sandbox"
+                  }
+              RunOrder: 1
+            - Name: Service22
+              InputArtifacts:
+                - Name: GitSource
+                - Name: VPCSource
+                - Name: ECSSource
+              OutputArtifacts:
+                - Name: Service1Output
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                TemplatePath: "GitSource::stacks/service2.bootstrap.stack.yml"
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                StackName:
+                  Fn::Join:
+                    - ''
+                    - - Ref: AppName
+                      - '-service2-sandbox'
+                ParameterOverrides: !Sub |
+                  {
+                    "Environment": "sandbox",
+                    "VPCStack" : "${AppName}-vpc-sandbox",
+                    "ECSStack" : "${AppName}-ecs-sandbox",
+                    "GitHubToken" : "${GitHubToken}",
+                    "AppName" : "${AppName}",
+                    "ServiceName" : "service2",
                     "NotificationsStack" : "${AppName}-notifications-sandbox"
                   }
               RunOrder: 1

@@ -1,7 +1,7 @@
 # Services CI/CD Stack
-Create an ECS Microservices stack with built-in CI/CD for the Infrastructure (IaC) and Code.
+Create an ECS Microservices stack with built-in CI/CD for your Infrastructure and Code.
 
-With every code push your Infrastructure will be updates.  
+With every code push your Infrastructure will be updated.  
 
 With every code push a new version of your Service will be built, tested, and deployed (optional).
 
@@ -14,7 +14,7 @@ Sandbox builds are pushed live automatically.
 
 Production builds are pushed manually by updating the Infrastructure.
 
-Build notifications and Deployment notifications are sent either as an email, sms message, and/or Slack message.
+Build notifications and Deployment notifications are sent either as an email, a sms message, and/or a Slack message.
 
 ## Architecture
 [![](architecture.png)](architecture.png)

@@ -38,7 +38,7 @@ Parameters:
   ServiceName:
     Type: String
     Description: Service name.  Lowercase
-    Default: 'service1'
+    Default: 'service2'
 
 Mappings:
   Branch:
@@ -375,7 +375,7 @@ Resources:
                       "ECSStack" : "${ECSStack}",
                       "RepositoryUrl": "${RepositoryUrl}",
                       "Environment" : "${Environment}",
-                      "Path": "service1"
+                      "Path": "service2"
                     }
                   - {
                       VPCStack: { "Ref" : "VPCStack"},
