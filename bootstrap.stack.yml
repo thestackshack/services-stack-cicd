@@ -575,7 +575,7 @@ Resources:
                     "NotificationsStack" : "${AppName}-notifications-sandbox"
                   }
               RunOrder: 1
-            - Name: Service22
+            - Name: Service2
               InputArtifacts:
                 - Name: GitSource
                 - Name: VPCSource
