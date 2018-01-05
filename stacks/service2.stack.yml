@@ -375,7 +375,8 @@ Resources:
                       "ECSStack" : "${ECSStack}",
                       "RepositoryUrl": "${RepositoryUrl}",
                       "Environment" : "${Environment}",
-                      "Path": "service2"
+                      "Path": "service2",
+                      "ListenerRulePriority": "3"
                     }
                   - {
                       VPCStack: { "Ref" : "VPCStack"},

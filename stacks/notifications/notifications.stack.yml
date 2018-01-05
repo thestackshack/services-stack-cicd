@@ -38,7 +38,7 @@ Resources:
   EventTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: !Sub "${AppName}-devops-events"
+      TopicName: !Sub "${AppName}-${Environment}-devops-events"
 
   EventTopicPolicy:
     Type: "AWS::SNS::TopicPolicy"
@@ -63,7 +63,7 @@ Resources:
   NotificationTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: !Sub "${AppName}-devops-notifications"
+      TopicName: !Sub "${AppName}-${Environment}-devops-notifications"
 
   #
   # Email subscription?
