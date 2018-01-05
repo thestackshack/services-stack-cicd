@@ -60,7 +60,7 @@ Each pipeline will execute the following steps every time you commit changes to 
 - Create/Update the [stacks/ecs.stack.yml](stacks/ecs.stack.yml) stack.
 - Create/Update the [stacks/service1.stack.yml](stacks/service1.stack.yml) stack.
 - Create/Update the [stacks/service2.stack.yml](stacks/service2.stack.yml) stack.
-
+ 
 The [stacks/service1.stack.yml](stacks/service1.stack.yml) stack creates a pipeline that updates the infrastructure and code found in this repo: [service1-stack-cicd](https://github.com/thestackshack/service1-stack-cicd).
 
 You will want to create your own service implementations.  You can create one or more services.  You can use this project as a template:  [service1-stack-cicd](https://github.com/thestackshack/service1-stack-cicd).
