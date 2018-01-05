@@ -1,0 +1,22 @@
+{
+  "Records": [
+    {
+      "EventSource": "aws:sns",
+      "EventVersion": "1.0",
+      "EventSubscriptionArn": "arn:aws:sns:us-east-1:132093761664:app-devops-events:91aff27b-fa19-4a96-b6ae-2e359169a528",
+      "Sns": {
+        "Type": "Notification",
+        "MessageId": "65a4965e-b9b0-5866-a5d6-c49611fc6009",
+        "TopicArn": "arn:aws:sns:us-east-1:132093761664:app-devops-events",
+        "Subject": null,
+        "Message": "{\"version\":\"0\",\"id\":\"6a7649ea-75fb-ec6a-8ec9-65fba5211af7\",\"detail-type\":\"ECS Task State Change\",\"source\":\"aws.ecs\",\"account\":\"132093761664\",\"time\":\"2018-01-04T22:09:15Z\",\"region\":\"us-east-1\",\"resources\":[\"arn:aws:ecs:us-east-1:132093761664:task/48dc50ff-4df4-4fea-a9fc-8a0e192f9f45\"],\"detail\":{\"clusterArn\":\"arn:aws:ecs:us-east-1:132093761664:cluster/app-ecs-prod\",\"containerInstanceArn\":\"arn:aws:ecs:us-east-1:132093761664:container-instance/29f9f692-9bf0-4022-9719-e15c801a9db8\",\"containers\":[{\"containerArn\":\"arn:aws:ecs:us-east-1:132093761664:container/9dc72eab-c589-4335-80fb-716e5d635259\",\"exitCode\":0,\"lastStatus\":\"STOPPED\",\"name\":\"app-service1-service-prod\",\"networkBindings\":[{\"bindIP\":\"0.0.0.0\",\"containerPort\":8000,\"hostPort\":32769,\"protocol\":\"tcp\"}],\"taskArn\":\"arn:aws:ecs:us-east-1:132093761664:task/48dc50ff-4df4-4fea-a9fc-8a0e192f9f45\"}],\"createdAt\":\"2018-01-04T20:08:21.128Z\",\"desiredStatus\":\"STOPPED\",\"group\":\"service:app-service1-service-prod-Service-IKHVELUD8SL0\",\"lastStatus\":\"STOPPED\",\"overrides\":{\"containerOverrides\":[{\"name\":\"app-service1-service-prod\"}]},\"startedAt\":\"2018-01-04T20:08:24.274Z\",\"startedBy\":\"ecs-svc/9223370521758284133\",\"stoppedAt\":\"2018-01-04T22:09:15.241Z\",\"stoppedReason\":\"Task stopped by user\",\"updatedAt\":\"2018-01-04T22:09:15.241Z\",\"taskArn\":\"arn:aws:ecs:us-east-1:132093761664:task/48dc50ff-4df4-4fea-a9fc-8a0e192f9f45\",\"taskDefinitionArn\":\"arn:aws:ecs:us-east-1:132093761664:task-definition/app-service1-service-prod:5\",\"version\":5}}",
+        "Timestamp": "2018-01-04T22:09:16.087Z",
+        "SignatureVersion": "1",
+        "Signature": "RuPYVSZ/r9/31hieIEPxHjkgvx2x98Sgkq7XwMqajEdCcV6K4b2Z1+vRhtEPK/mVp2+Fs6imhGvhwPGXDZcyggFaw7sxByUwhqkZaXyvnojE2GOBVtiVT46bAY97++SAKL82olcHWzQqQhbJz5QCw7UEbipujVMU/iCi8ycsm2m7T2zULHm4ZBcmG6HENaicG54B69NK9Uk9W3NrXgMC1lJed+1c9GtfO77a1bChbF9n2FvDuzXqSBouLDPm1ta6M0oIM5ohURbpXohCx3ih0isJnTxb9ZsJQ8DzMSTHlvXW0yX/33La8Y/yFSn0SWvCyio1E7SIoSd1zwyDuuk8GQ==",
+        "SigningCertUrl": "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-433026a4050d206028891664da859041.pem",
+        "UnsubscribeUrl": "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:132093761664:app-devops-events:91aff27b-fa19-4a96-b6ae-2e359169a528",
+        "MessageAttributes": {}
+      }
+    }
+  ]
+}

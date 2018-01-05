@@ -1,0 +1,22 @@
+{
+  "Records": [
+    {
+      "EventSource": "aws:sns",
+      "EventVersion": "1.0",
+      "EventSubscriptionArn": "arn:aws:sns:us-east-1:132093761664:app-devops-events:91aff27b-fa19-4a96-b6ae-2e359169a528",
+      "Sns": {
+        "Type": "Notification",
+        "MessageId": "1fb9bbfd-3d41-5a62-b013-e935950ab0d2",
+        "TopicArn": "arn:aws:sns:us-east-1:132093761664:app-devops-events",
+        "Subject": null,
+        "Message": "{\"version\":\"0\",\"id\":\"f592faa2-1b5d-143e-1cc1-238ac791113f\",\"detail-type\":\"ECS Task State Change\",\"source\":\"aws.ecs\",\"account\":\"132093761664\",\"time\":\"2018-01-04T22:09:14Z\",\"region\":\"us-east-1\",\"resources\":[\"arn:aws:ecs:us-east-1:132093761664:task/48dc50ff-4df4-4fea-a9fc-8a0e192f9f45\"],\"detail\":{\"clusterArn\":\"arn:aws:ecs:us-east-1:132093761664:cluster/app-ecs-prod\",\"containerInstanceArn\":\"arn:aws:ecs:us-east-1:132093761664:container-instance/29f9f692-9bf0-4022-9719-e15c801a9db8\",\"containers\":[{\"containerArn\":\"arn:aws:ecs:us-east-1:132093761664:container/9dc72eab-c589-4335-80fb-716e5d635259\",\"lastStatus\":\"RUNNING\",\"name\":\"app-service1-service-prod\",\"networkBindings\":[{\"bindIP\":\"0.0.0.0\",\"containerPort\":8000,\"hostPort\":32769,\"protocol\":\"tcp\"}],\"taskArn\":\"arn:aws:ecs:us-east-1:132093761664:task/48dc50ff-4df4-4fea-a9fc-8a0e192f9f45\"}],\"createdAt\":\"2018-01-04T20:08:21.128Z\",\"desiredStatus\":\"STOPPED\",\"group\":\"service:app-service1-service-prod-Service-IKHVELUD8SL0\",\"lastStatus\":\"RUNNING\",\"overrides\":{\"containerOverrides\":[{\"name\":\"app-service1-service-prod\"}]},\"startedAt\":\"2018-01-04T20:08:24.274Z\",\"startedBy\":\"ecs-svc/9223370521758284133\",\"stoppedReason\":\"Task stopped by user\",\"updatedAt\":\"2018-01-04T22:09:14.735Z\",\"taskArn\":\"arn:aws:ecs:us-east-1:132093761664:task/48dc50ff-4df4-4fea-a9fc-8a0e192f9f45\",\"taskDefinitionArn\":\"arn:aws:ecs:us-east-1:132093761664:task-definition/app-service1-service-prod:5\",\"version\":4}}",
+        "Timestamp": "2018-01-04T22:09:15.194Z",
+        "SignatureVersion": "1",
+        "Signature": "bYdJmeN1ohCmO1sb6oA1JdeRoZmzl+aFUzJ0QSzPx8/y2pdzHyYjXjl2XBKVTnQauVmL4k/83KuV0W827FfaP2qCwEC50zyYCX10GXaaZkOhV6VhX1cInkv/2Qb7QKSaJCO+xR4wg7OokLAGI1zAYWw7yZf7eWkJ/67DuEi633miJL77SP0mKzczl5T9OPvxjM/KcQpTq9FkFj2IzGKxVx/iUA+PaukAAnK2fpFOp6+7CNYL6YWC8p2T2HvzPpYlKfCogU8qU6XN2KlBW+1jl415ejE8ZMSXGiILj6GzTOgDu6hDPK6KEdU3TnM+5RfLaLatcI4ckF2fGXy2nd4slg==",
+        "SigningCertUrl": "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-433026a4050d206028891664da859041.pem",
+        "UnsubscribeUrl": "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:132093761664:app-devops-events:91aff27b-fa19-4a96-b6ae-2e359169a528",
+        "MessageAttributes": {}
+      }
+    }
+  ]
+}

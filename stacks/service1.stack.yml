@@ -227,9 +227,11 @@ Resources:
           - Name: REPOSITORY_URI
             Value: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${AppName}/${ServiceName}/${Environment}"
           - Name: APP
-            Value: !Ref AppName
-          #- Name: SNS_TOPIC_ARN
-          #  Value: !If [NeedsBuildNotification, !Ref "BuildTopic", '']
+            Value: !Sub "${AppName}-${Environment}"
+          - Name: SNS_TOPIC_ARN
+            Value:
+              Fn::ImportValue:
+                !Sub "${NotificationsStack}-EventTopic"
       Name: !Sub "${AWS::StackName}-code-build"
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Source:
