@@ -45,33 +45,13 @@ describe('index', function() {
     });
 
 
-    it('events - ecs-01', function (done) {
-        var sns = {
-            publish: function(input, done) {
-                winston.info('test - sns.publish');
-                winston.info(input.message);
-                assert.equal(input.topic, 'test');
-                assert.equal(input.message, 'i-0d69b9fd1ef15dd72, ACTIVE, , , false, ');
-                done();
-            }
-        };
-        var index = proxyquire('../index', {
-            './lib/sns': sns
-        });
-        process.env.NotificationTopic = 'test';
-        index.events(require('./resources/ecs-01.json'), {
-            succeed: done
-        });
-    });
-
-
     it('events - ecs-task-01', function (done) {
         var sns = {
             publish: function(input, done) {
                 winston.info('test - sns.publish');
                 winston.info(input.message);
                 assert.equal(input.topic, 'test');
-                assert.equal(input.message, 'service:app-service1-service-prod-Service-IKHVELUD8SL0, STOPPED, STOPPED, Task stopped by user, 5');
+                assert.equal(input.message, 'service:app-service1-service-prod-Service-IKHVELUD8SL0, STOPPED, STOPPED, Task stopped by user, arn:aws:ecs:us-east-1:132093761664:task-definition/app-service1-service-prod:5');
                 done();
             }
         };
