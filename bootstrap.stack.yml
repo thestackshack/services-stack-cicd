@@ -394,7 +394,7 @@ Resources:
                 - Name: VPCSource
                 - Name: ECSSource
               OutputArtifacts:
-                - Name: Service1Output
+                - Name: Service2Output
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
@@ -581,7 +581,7 @@ Resources:
                 - Name: VPCSource
                 - Name: ECSSource
               OutputArtifacts:
-                - Name: Service1Output
+                - Name: Service2Output
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS

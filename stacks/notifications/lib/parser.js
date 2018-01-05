@@ -45,7 +45,7 @@ functions.parse_ecs_task = function(message) {
             'service: '+group,
             'taskDefinition: '+taskDefinitionArn,
             'task: '+taskArn,
-            'reason: '+stoppedReason ? stoppedReason : ''
+            'reason: '+(stoppedReason ? stoppedReason : '')
         ], '\n');
     } else {
         return null;
