@@ -37,19 +37,24 @@ functions.parse_ecs_task = function(message) {
     const desiredStatus = message.detail.desiredStatus;
     const lastStatus = message.detail.lastStatus;
     const stoppedReason = message.detail.stoppedReason;
+    const taskArn = message.detail.taskArn;
     const taskDefinitionArn = message.detail.taskDefinitionArn;
-    return _.join([
-        group,
-        desiredStatus,
-        lastStatus,
-        stoppedReason,
-        taskDefinitionArn
-    ], ', ');
+    if (_.isEqual(desiredStatus, lastStatus)) {
+        return _.join([
+            'status: '+desiredStatus,
+            'service: '+group,
+            'taskDefinition: '+taskDefinitionArn,
+            'task: '+taskArn,
+            'reason: '+stoppedReason
+        ], '\n');
+    } else {
+        return null;
+    }
 };
 
 functions.parse = function(message) {
     winston.info('parser.parse');
-    winston.info(message);
+    winston.info(JSON.stringify(message));
     if (_.isString(message))
         return message;
     else if (_.isEqual(message['detail-type'], 'CodeBuild Build State Change'))

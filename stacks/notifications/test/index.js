@@ -51,7 +51,11 @@ describe('index', function() {
                 winston.info('test - sns.publish');
                 winston.info(input.message);
                 assert.equal(input.topic, 'test');
-                assert.equal(input.message, 'service:app-service1-service-prod-Service-IKHVELUD8SL0, STOPPED, STOPPED, Task stopped by user, arn:aws:ecs:us-east-1:132093761664:task-definition/app-service1-service-prod:5');
+                assert.equal(input.message, 'status: STOPPED\n' +
+                    'service: service:app-service1-service-prod-Service-IKHVELUD8SL0\n' +
+                    'taskDefinition: arn:aws:ecs:us-east-1:132093761664:task-definition/app-service1-service-prod:5\n' +
+                    'task: arn:aws:ecs:us-east-1:132093761664:task/48dc50ff-4df4-4fea-a9fc-8a0e192f9f45\n' +
+                    'reason: Task stopped by user');
                 done();
             }
         };
