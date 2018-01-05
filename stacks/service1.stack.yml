@@ -227,7 +227,7 @@ Resources:
           - Name: REPOSITORY_URI
             Value: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${AppName}/${ServiceName}/${Environment}"
           - Name: APP
-            Value: !Sub "${AppName}-${Environment}"
+            Value: !Sub "${AppName}-${ServiceName}-${Environment}"
           - Name: SNS_TOPIC_ARN
             Value:
               Fn::ImportValue:
