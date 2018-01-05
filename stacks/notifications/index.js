@@ -15,7 +15,7 @@ var functions = {};
 //
 functions.slack = function(event, context) {
     winston.info('slack');
-    winston.info(JSON.stringify(JSON.parse(event.Records[0].Sns.Message), null, 3));
+    winston.info(event.Records[0].Sns.Message);
     context.succeed();
 };
 
