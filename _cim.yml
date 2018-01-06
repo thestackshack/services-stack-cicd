@@ -19,9 +19,9 @@ stack:
     AppName: 'app'
 
     # Build Notification
-    NotificationEmail: 'rgfindley@gmail.com'
-    #NotificationSMS: '1-410-336-xxxx'
-    NotificationSlack: 'https://hooks.slack.com/services/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'
+    #NotificationEmail: 'xxxxxxx@gmail.com'
+    #NotificationSMS: '1-xxx-xxx-xxxx'
+    #NotificationSlack: 'https://hooks.slack.com/services/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'
 
   #
   # Define stack capabilities required.
